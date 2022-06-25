@@ -11,38 +11,20 @@ router.get("/protected", utils.authMiddleWare, (req, res, next) => {
 });
 
 // TODO
-router.post("/login", function (req, res, next) {
-  User.findOne({ username: req.body.username })
-    .then((user) => {
-      if (!user) {
-        res.status(401).json({ success: false, error: `couldn't find user` });
-      }
-      const isValid = utils.validPassword(
-        req.body.password,
-        user.hash,
-        user.salt
-      );
-      if (isValid) {
-      /*you may redirest to a specific page of your choice */
-        const tokenObj = utils.issueJWT(user);
-        res.status(200).json({
-          success: true,
-          user: user,
-          token: tokenObj.token,
-          expiresIn: tokenObj.expires,
-          message: `you loged in successfully with id ${user._id}`,
-        });
-      } else {
-        res
-          .status(401)
-          .json({ success: false, message: `failed to issue token` });
-      }
-    })
-    .catch((err) => console.log(err));
-});
-
-// TODO
 router.post("/register", function (req, res, next) {
+/*---- this implementation depends on impeding the utility functions in the model itself to decrease the dependencies requirment -----*/
+    const newUser = new User({
+      username:req.body.username,
+      email:req.body.email,
+      bio:req.body.bio,
+      image:req.body.image,
+    });
+    newUser.setPassword(req.body.password);
+    newUser.save()
+    .then(
+      (user)=>{res.status(200).json({registeration:true,user:user})}
+    )
+    .catch((err)=>{res.status(404).json({err:err})})
 
 /*---this implementaion dependes on accesing the utility functions in the pathway itself -------*/
   /*let salethash = utils.genPassword(req.body.password);
@@ -67,19 +49,65 @@ router.post("/register", function (req, res, next) {
     .catch((err) => {
       res.json({ error: err });
     });*/
-/*---- this implementation depends on impeding the utility functions in the model itself to decrease the dependencies requirment -----*/
-    const newUser = new User({
-      username:req.body.username,
-      email:req.body.email,
-      bio:req.body.bio,
-      image:req.body.image,
-    });
-    newUser.setPassword(req.body.password);
-    newUser.save()
-    .then(
-      (user)=>{res.status(200).json({registeration:true,user:user})}
-    )
-    .catch((err)=>{res.status(404).json({err:err})})
+
 });
+
+// TODO
+router.post("/login", function (req, res, next) {
+/*---this implementaion dependes on accesing the utility functions in the pathway itself -------*/
+ /* User.findOne({ username: req.body.username })
+    .then((user) => {
+      if (!user) {
+        res.status(401).json({ success: false, error: `couldn't find user` });
+      }
+      const isValid = utils.validPassword(
+        req.body.password,
+        user.hash,
+        user.salt
+      );
+      if (isValid) {
+     /*you may redirest to a specific page of your choice */
+      /*  const tokenObj = utils.issueJWT(user);
+        res.status(200).json({
+          success: true,
+          user: user,
+          token: tokenObj.token,
+          expiresIn: tokenObj.expires,
+          message: `you loged in successfully with id ${user._id}`,
+        });
+      } else {
+        res
+          .status(401)
+          .json({ success: false, message: `failed to issue token` });
+      }
+    })
+    .catch((err) => console.log(err));*/
+    /*---- this implementation depends on impeding the utility functions in the model itself to decrease the dependencies requirment -----*/
+    User.findOne({ username: req.body.username })
+    .then((user) => {
+      if (!user) {
+        res.status(401).json({ success: false, error: `couldn't find user` });
+      }
+     let isValid = user.isValidPassword(req.body.password);
+      if (isValid) {
+      /*you may redirest to a specific page of your choice */
+        const tokenObj = utils.issueJWT(user);
+        res.status(200).json({
+          success: true,
+          user: user,
+          token: tokenObj.token,
+          expiresIn: tokenObj.expires,
+          message: `you loged in successfully with id ${user._id}`,
+        });
+      } else {
+        res
+          .status(401)
+          .json({ success: false, message: `Password is incorrect` });
+      }
+    })
+    .catch((err) => console.log(err));
+});
+
+
 
 module.exports = router;

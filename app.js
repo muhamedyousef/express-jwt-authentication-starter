@@ -18,6 +18,7 @@ require('./config/database');
 
 // Must first load the models
 require('./models/user');
+require('./models/img')
 
 // Pass the global passport object into the configuration function
 require('./config/passport')(passport);
