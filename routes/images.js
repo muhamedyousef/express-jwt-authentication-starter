@@ -4,6 +4,7 @@ const Img = mongoose.model('Img');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path')
+const utils = require('../lib/utils');
 
 var storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -18,13 +19,14 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage });
 
 
-router.post('/upload', upload.single('image'), (req, res, next) => {
+router.post('/upload', utils.authMiddleWare , upload.single('image'), (req, res, next) => {
     console.log(req)
     let finalPath = path.join('D:\\work\\express-jwt-authentication-starter' + '/images/' + req.file.filename);
     console.log(finalPath)
     var obj = {
         name: req.body.name,
         desc: req.body.desc,
+        creator_id:req.jwt.sub,
         img: {
             data: fs.readFileSync(finalPath),
             contentType: path.parse(finalPath).ext //not worhing yet 25/6/2022

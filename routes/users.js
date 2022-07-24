@@ -1,3 +1,4 @@
+const { response } = require("express");
 const mongoose = require("mongoose");
 const router = require("express").Router();
 const User = mongoose.model("User");
@@ -8,6 +9,7 @@ const utils = require("../lib/utils");
 // TODO
 router.get("/protected", utils.authMiddleWare, (req, res, next) => {
   res.status(200).json({ success: true, message: `you are Authorized`,token:req.jwt });
+  console.log(req.headers);
 });
 
 // TODO
@@ -92,6 +94,10 @@ router.post("/login", function (req, res, next) {
       if (isValid) {
       /*you may redirest to a specific page of your choice */
         const tokenObj = utils.issueJWT(user);
+        
+        res.cookie('JWTtoken',tokenObj,{
+          httpOnly:true
+        })
         res.status(200).json({
           success: true,
           user: user,
@@ -107,6 +113,13 @@ router.post("/login", function (req, res, next) {
     })
     .catch((err) => console.log(err));
 });
+
+
+
+router.get("/test",(req,res,next)=>{
+    console.log(req.headers)
+    res.send('done')
+})
 
 
 
